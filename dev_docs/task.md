@@ -1,0 +1,47 @@
+# Project Setup Task List
+
+- [x] Research frameworks compatible with Windows 7 <!-- id: 0 -->
+    - [x] Verify .NET Framework versions
+    - [x] Verify Python versions
+    - [x] Verify Go versions
+    - [x] Verify GUI libraries (Qt, etc.)
+- [x] Present options to User <!-- id: 1 -->
+- [x] Initialize project with selected framework <!-- id: 2 -->
+    - [x] Create `requirements.txt` with Win7 compatible versions
+    - [x] Create `main.py` (Basic GUI)
+    - [x] Create `README.md` with setup instructions
+- [x] Implement Search Logic <!-- id: 3 -->
+    - [x] Create UI for directory selection (ComboBox for history) and keyword input
+    - [x] Implement recursive text file search algorithm
+    - [x] Connect UI to search logic
+- [x] Implement Result Display <!-- id: 4 -->
+    - [x] Create list widget to show matching files (FULL PATH)
+    - [x] Handle file selection events
+- [x] Implement Content Viewer <!-- id: 5 -->
+    - [x] Create text area to display file content
+    - [x] Implement keyword highlighting logic
+- [x] Implement Persistence <!-- id: 6 -->
+    - [x] Load/Save directory history to `config.json`
+    - [x] Validate directory existence on startup
+- [x] Build Executable <!-- id: 7 -->
+    - [x] Run PyInstaller
+    - [x] Verify `dist/FileFinder.exe` creation
+- [x] Enhance UI and Usability <!-- id: 8 -->
+    - [x] Increase Application Font Size (12pt+)
+    - [x] Add "Stop Search" button and logic
+    - [x] Update Status Bar with current file being scanned
+    - [x] Persist Window Location and Size (Maximize by default)
+- [x] Refine UI Layout <!-- id: 9 -->
+    - [x] Increase Font Size (18pt+)
+    - [x] Expand Directory ComboBox to fill width
+- [x] Filter Search for Text Files <!-- id: 10 -->
+    - [x] Define list of text extensions
+    - [x] Update `SearchThread` to filter by extension
+- [x] Refine File Extensions <!-- id: 11 -->
+    - [x] Restrict to .txt, .htm, .html only
+- [x] Fix Search Encoding <!-- id: 12 -->
+    - [x] Add support for GB18030/GBK encoding
+    - [x] Add support for UTF-16 encoding
+- [x] Fix Thumbs.db UI Issue <!-- id: 13 -->
+    - [x] Move status update after extension check
+    - [x] Add directory-level status update
