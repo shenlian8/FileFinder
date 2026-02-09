@@ -117,10 +117,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("文件搜索器 - 3S Lab")
         self.resize(800, 600)
         
-        # Set application icon if available
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icon.ico')
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
 
         # Config Data
         self.history = []
