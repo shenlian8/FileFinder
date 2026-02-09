@@ -56,6 +56,12 @@ class SearchThread(QThread):
                 start_path = os.path.join(root, file)
                 self.current_file.emit(f"Scanning File: {start_path}")
                 
+                # Check FILENAME first
+                file_lower = file.lower()
+                if all(k in file_lower for k in keywords):
+                    self.match_found.emit(os.path.abspath(start_path))
+                    continue # Found by filename, skip content check
+
                 # Try to read file to check if it contains the keyword
                 found = False
                 encodings_to_try = ['utf-8', 'gb18030', 'utf-16', 'gbk', 'big5']
