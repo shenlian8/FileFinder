@@ -342,6 +342,7 @@ class MainWindow(QMainWindow):
 
     def load_settings(self):
         if not os.path.exists(CONFIG_FILE):
+            self.showMaximized()
             return
 
         try:
