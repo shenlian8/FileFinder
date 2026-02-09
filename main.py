@@ -3,21 +3,23 @@ import os
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, 
                              QPushButton, QListWidget, QTextEdit, QFileDialog, QLineEdit, 
-                             QHBoxLayout, QSplitter, QComboBox, QMessageBox, QFrame)
+                             QHBoxLayout, QSplitter, QComboBox, QMessageBox, QFrame, QCheckBox)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QFont, QPainter, QBrush, QPaintEvent, QIcon
 
 CONFIG_FILE = "config.json"
+TEXT_EXTENSIONS = {'.txt', '.htm', '.html'}
 
 class SearchThread(QThread):
     match_found = pyqtSignal(str)
     current_file = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, directory, keyword):
+    def __init__(self, directory, keyword, search_all=False):
         super().__init__()
         self.directory = directory
         self.keyword = keyword
+        self.search_all = search_all
         self.running = True
 
     def run(self):
@@ -33,9 +35,7 @@ class SearchThread(QThread):
              return
 
         # Extensions to consider as text files
-        text_extensions = {
-            '.txt', '.htm', '.html'
-        }
+        # Use global TEXT_EXTENSIONS
 
         for root, dirs, files in os.walk(self.directory):
             if not self.running:
@@ -48,9 +48,12 @@ class SearchThread(QThread):
                 if not self.running:
                     break
                 
-                # Check extension FIRST
+                # Check extension
                 _, ext = os.path.splitext(file)
-                if ext.lower() not in text_extensions:
+                is_text_file = ext.lower() in TEXT_EXTENSIONS
+                
+                # If NOT searching all files, and NOT a text file, skip
+                if not self.search_all and not is_text_file:
                     continue
 
                 start_path = os.path.join(root, file)
@@ -63,6 +66,10 @@ class SearchThread(QThread):
                     continue # Found by filename, skip content check
 
                 # Try to read file to check if it contains the keyword
+                # Only read content if it is a text file
+                if not is_text_file:
+                    continue
+
                 found = False
                 encodings_to_try = ['utf-8', 'gb18030', 'utf-16', 'gbk', 'big5']
                 
@@ -161,6 +168,13 @@ class MainWindow(QMainWindow):
         self.search_btn.clicked.connect(self.start_search)
         search_layout.addWidget(self.search_btn)
 
+        self.all_files_check = QCheckBox("搜索所有文件 (非文本仅匹配文件名)")
+        self.all_files_check.setStyleSheet("""
+            QCheckBox { font-size: 14pt; }
+            QCheckBox::indicator { width: 25px; height: 25px; }
+        """)
+        search_layout.addWidget(self.all_files_check)
+
         self.stop_btn = QPushButton("停止")
         self.stop_btn.clicked.connect(self.stop_search)
         self.stop_btn.setEnabled(False)
@@ -226,6 +240,7 @@ class MainWindow(QMainWindow):
     def start_search(self):
         directory = self.dir_combo.currentText().strip()
         keyword = self.keyword_input.text().strip()
+        search_all = self.all_files_check.isChecked()
 
         if not directory or not os.path.isdir(directory):
             QMessageBox.warning(self, "错误", "请选择一个有效的目录。")
@@ -245,7 +260,7 @@ class MainWindow(QMainWindow):
         self.save_settings() # Save history on search
 
         # Start Thread
-        self.search_thread = SearchThread(directory, keyword)
+        self.search_thread = SearchThread(directory, keyword, search_all)
         self.search_thread.match_found.connect(self.add_file_to_list)
         self.search_thread.current_file.connect(self.update_status)
         self.search_thread.finished.connect(self.search_finished)
@@ -271,6 +286,11 @@ class MainWindow(QMainWindow):
     def display_file_content(self, item):
         file_path = item.text()
         keyword = self.keyword_input.text()
+
+        _, ext = os.path.splitext(file_path)
+        if ext.lower() not in TEXT_EXTENSIONS:
+            self.content_viewer.setPlainText(file_path)
+            return
 
         content = ""
         encodings_to_try = ['utf-8', 'gb18030', 'utf-16', 'gbk', 'big5']
@@ -371,6 +391,9 @@ class MainWindow(QMainWindow):
                     self.dir_combo.setCurrentText(last_path)
             else:
                  self.dir_combo.setCurrentIndex(-1)
+
+            # Restore checkbox state
+            self.all_files_check.setChecked(data.get("search_all_files", False))
                  
             # Restore window geometry
             geometry_hex = data.get("geometry")
@@ -405,7 +428,8 @@ class MainWindow(QMainWindow):
         data = {
             "history": items,
             "last_path": current_path,
-            "geometry": geometry
+            "geometry": geometry,
+            "search_all_files": self.all_files_check.isChecked()
         }
         
         try:
