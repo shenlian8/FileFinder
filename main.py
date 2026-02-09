@@ -42,7 +42,7 @@ class SearchThread(QThread):
                 break
             
             # Update status for directory to show progress through structure
-            self.current_file.emit(f"Scanning Directory: {root}")
+            self.current_file.emit(f"正在扫描目录: {root}")
             
             for file in files:
                 if not self.running:
@@ -54,7 +54,7 @@ class SearchThread(QThread):
                     continue
 
                 start_path = os.path.join(root, file)
-                self.current_file.emit(f"Scanning File: {start_path}")
+                self.current_file.emit(f"正在扫描文件: {start_path}")
                 
                 # Check FILENAME first
                 file_lower = file.lower()
@@ -114,11 +114,11 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("FileFinder - 3S Lab")
+        self.setWindowTitle("文件搜索器 - 3S Lab")
         self.resize(800, 600)
         
         # Set application icon if available
-        icon_path = os.path.join(os.path.dirname(__file__), 'icon.ico')
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icon.ico')
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -137,14 +137,14 @@ class MainWindow(QMainWindow):
         # --- Directory Selection Section ---
         dir_layout = QHBoxLayout()
         
-        dir_label = QLabel("Directory:")
+        dir_label = QLabel("目录:")
         dir_layout.addWidget(dir_label)
 
         self.dir_combo = QComboBox()
         self.dir_combo.setEditable(True)
         dir_layout.addWidget(self.dir_combo, 1)
 
-        browse_btn = QPushButton("Browse...")
+        browse_btn = QPushButton("浏览...")
         browse_btn.clicked.connect(self.browse_directory)
         dir_layout.addWidget(browse_btn)
 
@@ -153,19 +153,19 @@ class MainWindow(QMainWindow):
         # --- Search Section ---
         search_layout = QHBoxLayout()
         
-        keyword_label = QLabel("Keywords:")
+        keyword_label = QLabel("关键字:")
         search_layout.addWidget(keyword_label)
 
         self.keyword_input = QLineEdit()
-        self.keyword_input.setPlaceholderText("Enter text to search...")
+        self.keyword_input.setPlaceholderText("请输入要搜索的文本...")
         self.keyword_input.returnPressed.connect(self.start_search)
         search_layout.addWidget(self.keyword_input, 1)
 
-        self.search_btn = QPushButton("Search")
+        self.search_btn = QPushButton("搜索")
         self.search_btn.clicked.connect(self.start_search)
         search_layout.addWidget(self.search_btn)
 
-        self.stop_btn = QPushButton("Stop")
+        self.stop_btn = QPushButton("停止")
         self.stop_btn.clicked.connect(self.stop_search)
         self.stop_btn.setEnabled(False)
         search_layout.addWidget(self.stop_btn)
@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(splitter)
         
         # Status Bar
-        self.status_label = QLabel("Ready")
+        self.status_label = QLabel("就绪")
         self.statusBar().addWidget(self.status_label)
 
     def browse_directory(self):
@@ -216,7 +216,7 @@ class MainWindow(QMainWindow):
         if not os.path.isdir(current_path):
             current_path = os.getcwd()
             
-        directory = QFileDialog.getExistingDirectory(self, "Select Directory", current_path)
+        directory = QFileDialog.getExistingDirectory(self, "选择目录", current_path)
         if directory:
             # Update combo box
             self.update_directory_combo(directory)
@@ -232,11 +232,11 @@ class MainWindow(QMainWindow):
         keyword = self.keyword_input.text().strip()
 
         if not directory or not os.path.isdir(directory):
-            QMessageBox.warning(self, "Error", "Please select a valid directory.")
+            QMessageBox.warning(self, "错误", "请选择一个有效的目录。")
             return
         
         if not keyword:
-            QMessageBox.warning(self, "Error", "Please enter a keyword.")
+            QMessageBox.warning(self, "错误", "请输入关键字。")
             return
 
         # Prepare UI
@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
         self.highlighter.set_matches([]) # Clear highlighter
         self.search_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
-        self.status_label.setText("Searching...")
+        self.status_label.setText("正在搜索...")
         self.save_settings() # Save history on search
 
         # Start Thread
@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
     def stop_search(self):
         if hasattr(self, 'search_thread') and self.search_thread.isRunning():
             self.search_thread.stop()
-            self.status_label.setText("Stopping...")
+            self.status_label.setText("正在停止...")
 
     def update_status(self, message):
         self.status_label.setText(message)
@@ -270,7 +270,7 @@ class MainWindow(QMainWindow):
         self.search_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
         count = self.file_list.count()
-        self.status_label.setText(f"Search finished. Found {count} files.")
+        self.status_label.setText(f"搜索完成。找到 {count} 个文件。")
 
     def display_file_content(self, item):
         file_path = item.text()
@@ -290,9 +290,9 @@ class MainWindow(QMainWindow):
         if content:
             self.content_viewer.setPlainText(content)
             self.highlight_keyword(keyword)
-            self.status_label.setText(f"Viewing: {file_path}")
+            self.status_label.setText(f"正在查看: {file_path}")
         else:
-            self.content_viewer.setPlainText(f"Error reading file: Could not decode with {encodings_to_try}")
+            self.content_viewer.setPlainText(f"读取文件错误: 无法解码 {encodings_to_try}")
             self.highlighter.set_matches([])
 
     def highlight_keyword(self, keyword_msg):
