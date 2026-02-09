@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
         # --- Search Section ---
         search_layout = QHBoxLayout()
         
-        keyword_label = QLabel("Keyword:")
+        keyword_label = QLabel("Keywords:")
         search_layout.addWidget(keyword_label)
 
         self.keyword_input = QLineEdit()
