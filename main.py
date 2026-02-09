@@ -293,45 +293,50 @@ class MainWindow(QMainWindow):
     def highlight_keyword(self, keyword_msg):
         if not keyword_msg:
             self.highlighter.set_matches([])
+            self.content_viewer.setExtraSelections([])
             return
             
         keywords = [k.strip() for k in keyword_msg.split() if k.strip()]
         if not keywords:
             self.highlighter.set_matches([])
+            self.content_viewer.setExtraSelections([])
             return
 
-        cursor = self.content_viewer.textCursor()
-        # Reset cursor to start
-        cursor.movePosition(QTextCursor.Start)
-        self.content_viewer.setTextCursor(cursor)
+        # Prepare for highlighting using ExtraSelections (non-destructive)
+        extra_selections = []
+        
+        # We'll use a specific format for the highlight
+        selection_format = QTextCharFormat()
+        selection_format.setBackground(QColor("yellow"))
+        selection_format.setForeground(QColor("black"))
 
-        format = QTextCharFormat()
-        format.setBackground(QColor("yellow"))
-        format.setForeground(QColor("black"))
-
-        total_length = self.content_viewer.document().characterCount()
+        doc = self.content_viewer.document()
+        total_length = doc.characterCount()
         match_positions = []
 
         # Iterate over all keywords
         for key in keywords:
-            # For each keyword, scan the whole document
-            cursor = self.content_viewer.textCursor() 
-            cursor.movePosition(QTextCursor.Start)
+            # Use a fresh cursor for searching to avoid focus/selection side effects
+            cursor = QTextCursor(doc)
             
             while True:
-                # Find next occurrence
-                cursor = self.content_viewer.document().find(key, cursor)
+                cursor = doc.find(key, cursor)
                 if cursor.isNull():
                     break
                 
-                cursor.mergeCharFormat(format)
+                # Create an extra selection for this match
+                selection = QTextEdit.ExtraSelection()
+                selection.format = selection_format
+                selection.cursor = cursor
+                extra_selections.append(selection)
                 
                 # Calculate relative position for scrollbar
-                # Cursor position is at the END of the match
                 pos = cursor.position()
                 if total_length > 0:
                     match_positions.append(pos / total_length)
         
+        # Apply all highlights at once
+        self.content_viewer.setExtraSelections(extra_selections)
         self.highlighter.set_matches(match_positions)
 
     def load_settings(self):
