@@ -198,6 +198,10 @@ class MainWindow(QMainWindow):
         browse_btn.clicked.connect(self.browse_directory)
         dir_layout.addWidget(browse_btn)
 
+        self.help_btn = QPushButton("使用说明")
+        self.help_btn.clicked.connect(self.show_help)
+        dir_layout.addWidget(self.help_btn)
+
         main_layout.addLayout(dir_layout)
 
         # --- Search Section ---
@@ -226,10 +230,6 @@ class MainWindow(QMainWindow):
         self.stop_btn.clicked.connect(self.stop_search)
         self.stop_btn.setEnabled(False)
         search_layout.addWidget(self.stop_btn)
-
-        self.help_btn = QPushButton("使用说明")
-        self.help_btn.clicked.connect(self.show_help)
-        search_layout.addWidget(self.help_btn)
 
         main_layout.addLayout(search_layout)
 
