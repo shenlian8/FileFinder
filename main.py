@@ -25,8 +25,13 @@ class SearchThread(QThread):
             self.finished.emit()
             return
         
-        search_lower = self.keyword.lower()
+        # Prepare keywords (split by whitespace, remove empty)
+        keywords = [k.strip().lower() for k in self.keyword.split() if k.strip()]
         
+        if not keywords:
+             self.finished.emit()
+             return
+
         # Extensions to consider as text files
         text_extensions = {
             '.txt', '.htm', '.html'
@@ -59,7 +64,9 @@ class SearchThread(QThread):
                     try:
                         with open(start_path, 'r', encoding=enc) as f:
                             content = f.read()
-                            if search_lower in content.lower():
+                            content_lower = content.lower()
+                            # Check if ALL keywords are in content
+                            if all(k in content_lower for k in keywords):
                                 self.match_found.emit(os.path.abspath(start_path))
                                 found = True
                         if found:
@@ -277,8 +284,13 @@ class MainWindow(QMainWindow):
             self.content_viewer.setPlainText(f"Error reading file: Could not decode with {encodings_to_try}")
             self.highlighter.set_matches([])
 
-    def highlight_keyword(self, keyword):
-        if not keyword:
+    def highlight_keyword(self, keyword_msg):
+        if not keyword_msg:
+            self.highlighter.set_matches([])
+            return
+            
+        keywords = [k.strip() for k in keyword_msg.split() if k.strip()]
+        if not keywords:
             self.highlighter.set_matches([])
             return
 
@@ -294,19 +306,25 @@ class MainWindow(QMainWindow):
         total_length = self.content_viewer.document().characterCount()
         match_positions = []
 
-        while True:
-            # Find next occurrence
-            cursor = self.content_viewer.document().find(keyword, cursor)
-            if cursor.isNull():
-                break
+        # Iterate over all keywords
+        for key in keywords:
+            # For each keyword, scan the whole document
+            cursor = self.content_viewer.textCursor() 
+            cursor.movePosition(QTextCursor.Start)
             
-            cursor.mergeCharFormat(format)
-            
-            # Calculate relative position for scrollbar
-            # Cursor position is at the END of the match
-            pos = cursor.position()
-            if total_length > 0:
-                match_positions.append(pos / total_length)
+            while True:
+                # Find next occurrence
+                cursor = self.content_viewer.document().find(key, cursor)
+                if cursor.isNull():
+                    break
+                
+                cursor.mergeCharFormat(format)
+                
+                # Calculate relative position for scrollbar
+                # Cursor position is at the END of the match
+                pos = cursor.position()
+                if total_length > 0:
+                    match_positions.append(pos / total_length)
         
         self.highlighter.set_matches(match_positions)
 
