@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QVBoxLa
                              QPushButton, QListWidget, QTextEdit, QFileDialog, QLineEdit, 
                              QHBoxLayout, QSplitter, QComboBox, QMessageBox, QFrame)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QFont, QPainter, QBrush, QPaintEvent
+from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QFont, QPainter, QBrush, QPaintEvent, QIcon
 
 CONFIG_FILE = "config.json"
 
@@ -114,8 +114,13 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("FileFinder - Windows 7 Compatible")
+        self.setWindowTitle("FileFinder - 3S Lab")
         self.resize(800, 600)
+        
+        # Set application icon if available
+        icon_path = os.path.join(os.path.dirname(__file__), 'icon.ico')
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # Config Data
         self.history = []
