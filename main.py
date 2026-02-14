@@ -3,7 +3,7 @@ import os
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, 
                              QPushButton, QListWidget, QTextEdit, QFileDialog, QLineEdit, 
-                             QHBoxLayout, QSplitter, QComboBox, QMessageBox, QFrame, QCheckBox, QDialog)
+                             QHBoxLayout, QSplitter, QComboBox, QMessageBox, QFrame, QCheckBox, QDialog, QPlainTextEdit)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QFont, QPainter, QBrush, QPaintEvent, QIcon
 
@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(2)
 
-        self.content_viewer = QTextEdit()
+        self.content_viewer = QPlainTextEdit()
         self.content_viewer.setReadOnly(True)
         # Widen the vertical scrollbar
         self.content_viewer.setStyleSheet("""
